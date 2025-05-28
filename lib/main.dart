@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp()) ;
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -9,9 +9,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HomePage(),
-    );
+    return MaterialApp(home: HomePage());
   }
 }
 
@@ -23,71 +21,76 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // variables
+  // متغيرات
   GlobalKey<FormState> _key = GlobalKey<FormState>();
-  List<int> rating = [];
+
+  double rateSum = 0;
+  double rateCount = 0;
+  double tempRate = 1;
+
   int _rateValue = 1;
-  late int avgRate = 1;
+  late double avgRate = 0;
+
   String userName = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Form(
-          onChanged: () {
-
-          },
-          key:  _key,
-          child: Column(
-            children: [
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: "Your Name" ,
-                ),
-                validator: (val) {
-                  if (val!.isEmpty || val == null) {
-                    return 'Please Enter Your Name';
+        key: _key,
+        child: Column(
+          children: [
+            TextFormField(
+              decoration: InputDecoration(labelText: "Your Name"),
+              validator: (val) {
+                if (val!.isEmpty) {
+                  return 'Please Enter Your Name';
+                }
+                return null;
+              },
+              onSaved: (val) {
+                setState(() {
+                  userName = val!;
+                });
+              },
+            ),
+            Text("How satisfied are you with the product?"),
+            ...List.generate(4, (index) {
+              int rate = index + 1;
+              return RadioListTile<int>(
+                title: Text("$rate Stars"),
+                value: rate,
+                groupValue: _rateValue,
+                onChanged: (int? val) {
+                  if (val != null) {
+                    setState(() {
+                      _rateValue = val;
+                      tempRate = val.toDouble();
+                    });
                   }
-                  return null ;
                 },
-                onSaved: (val) {
-                  setState(() {
-                    userName = val!;
-                  });
-                },
-              ) ,
-              Text("How satisfied are you with the product?") ,
-              Row(
-                children: [
-                  Radio(value: 1, groupValue: _rateValue, onChanged: (val) => null) ,
-                  Text("1 Star")
-                ],
-              ),
-
-              Row(
-                children: [
-                  Radio(value: 2, groupValue: _rateValue, onChanged: (val) => null) ,
-                  Text("2 Star")
-                ],
-              ),
-
-              Row(
-                children: [
-                  Radio(value: 3, groupValue: _rateValue, onChanged: (val) => null) ,
-                  Text("3 Star")
-                ],
-              ),
-              ElevatedButton(onPressed: () {
-                if(_key.currentState!.validate()) {
+              );
+            }),
+            ElevatedButton(
+              onPressed: () {
+                if (_key.currentState!.validate()) {
                   _key.currentState!.save();
                   print("Done");
                 }
-              }, child: Text("Submit")) ,
-              SizedBox(height: 50.0,),
-              Text("Thank you, ${userName}! Your rating: ${_rateValue} \n Average Rating: ${avgRate}")
-            ],
-
-          )),
+                setState(() {
+                  rateSum += tempRate;
+                  rateCount++;
+                  avgRate = rateSum / rateCount;
+                });
+              },
+              child: Text("Submit"),
+            ),
+            SizedBox(height: 50.0),
+            Text(
+                "Thank you, ${userName}! Your rating: ${_rateValue} \nAverage Rating: ${avgRate.round()}")
+          ],
+        ),
+      ),
     );
   }
 }
-
